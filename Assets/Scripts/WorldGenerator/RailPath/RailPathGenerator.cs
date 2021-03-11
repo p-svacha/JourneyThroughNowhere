@@ -21,7 +21,7 @@ public class RailPathGenerator
 
         CurrentPoint = new RailPathPoint(new Vector3(0f, 0f, 0f), null);
         PathPoints.Add(CurrentPoint);
-        RailSettings = new RailSettings(plankWidth: 6f, plankHeight: 0.2f, trackWidth: 0.5f, trackGap: 3f, trackHeight: 0.2f);
+        RailSettings = new RailSettings(plankWidth: 3f, plankHeight: 0.2f, trackWidth: 0.1f, trackGap: 1.5f, trackHeight: 0.2f);
     }
 
     public void GeneratePath(int numSegments)
@@ -43,11 +43,29 @@ public class RailPathGenerator
     public void DrawPath()
     {
         GameObject railPath = new GameObject("RailPath");
+
+        // Draw segments
         for (int i = 1; i < PathPoints.Count; i++)
         {
             RailSegment newSegment = RailSegmentMeshGenerator.GenerateRailSegment(railPath, PathPoints[i - 1], PathPoints[i], RailSettings);
             newSegment.Init(PathPoints[i - 1], PathPoints[i], RailSettings);
             RailSegments.Add(newSegment);
+        }
+
+        // Init segment connections
+        foreach(RailPathPoint rpp in PathPoints)
+        {
+            foreach(RailSegment rs1 in rpp.Segments)
+            {
+                foreach(RailSegment rs2 in rpp.Segments)
+                {
+                    if(rs1 != rs2 && !rs1.ConnectedSegments.Contains(rs2) && !rs2.ConnectedSegments.Contains(rs1))
+                    {
+                        rs1.ConnectedSegments.Add(rs2);
+                        rs2.ConnectedSegments.Add(rs1);
+                    }
+                }
+            }
         }
     }
 
@@ -57,7 +75,6 @@ public class RailPathGenerator
         float nextY = 0f;
         float nextZ = CurrentPoint.Position.z + (Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * RailSegmentLength);
         Vector3 newPosition = new Vector3(nextX, nextY, nextZ);
-        Debug.Log(newPosition);
         RailPathPoint nextPoint = new RailPathPoint(newPosition, CurrentPoint);
         AddConnection(CurrentPoint, nextPoint);
         PathPoints.Add(nextPoint);

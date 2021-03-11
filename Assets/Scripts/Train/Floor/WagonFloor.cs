@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class TrainPart : MonoBehaviour
+public class WagonFloor : TrainPart
 {
-    public TrainPartType Type;
-    public Wagon Wagon;
+    public const float FloorHeight = 0.2f;
 
-
-    public abstract void Init(Wagon wagon);
+    public override void Init(Wagon wagon)
+    {
+        Wagon = wagon;
+        Type = TrainPartType.Floor;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -21,10 +23,4 @@ public abstract class TrainPart : MonoBehaviour
     {
         
     }
-}
-
-public enum TrainPartType
-{
-    Wheel,
-    Floor
 }

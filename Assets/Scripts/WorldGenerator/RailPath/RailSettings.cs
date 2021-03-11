@@ -9,6 +9,7 @@ public class RailSettings
     public float TrackWidth;
     public float TrackGap;
     public float TrackHeight;
+    public float TotalHeight;
 
     public RailSettings(float plankWidth, float plankHeight, float trackWidth, float trackGap, float trackHeight)
     {
@@ -17,5 +18,6 @@ public class RailSettings
         TrackWidth = trackWidth;
         TrackGap = trackGap;
         TrackHeight = trackHeight;
+        TotalHeight = PlankHeight + TrackHeight;
     }
 }

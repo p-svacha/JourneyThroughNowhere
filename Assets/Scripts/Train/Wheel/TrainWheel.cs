@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class TrainWheel : TrainPart
 {
-    public override void Init()
+    public override void Init(Wagon wagon)
     {
+        Wagon = wagon;
         Type = TrainPartType.Wheel;
     }
 

@@ -81,11 +81,7 @@ public static class RailSegmentMeshGenerator
 
     private static void GeneratePlank(GameObject segmentObject, RailPathPoint p1, RailPathPoint p2, RailSettings settings, Vector3 toVector, Vector3 toVectorPpc)
     {
-        GameObject plankObject = new GameObject("Plank");
-        plankObject.layer = LayerMask.NameToLayer("Ground");
-        plankObject.transform.SetParent(segmentObject.transform);
-        MeshFilter meshFilter = plankObject.AddComponent<MeshFilter>();
-        MeshRenderer meshRenderer = plankObject.AddComponent<MeshRenderer>();
+        GameObject plankObject = MeshGenerator.CreateEmptyObject("Plank", segmentObject.transform);
 
         Vector3[] vertices = new Vector3[0];
         int[] triangles = new int[0];
@@ -104,15 +100,7 @@ public static class RailSegmentMeshGenerator
         Vector3 rightFrontBot = frontOrigin + (toVectorPpc * settings.PlankWidth / 2f);
         Vector3 leftFrontBot = frontOrigin - (toVectorPpc * settings.PlankWidth / 2f);
 
-        List<Vector3> plankVertices = new List<Vector3>() { leftBackTop, rightBackTop, rightFrontTop, leftFrontTop, leftBackBot, rightBackBot, rightFrontBot, leftFrontBot };
-
-        MeshGenerator.AddCube(ref vertices, ref triangles, plankVertices);
-
-        meshFilter.mesh.vertices = vertices;
-        meshFilter.mesh.triangles = triangles;
-        meshFilter.mesh.RecalculateNormals();
-        meshRenderer.material = MaterialHandler.Instance.DefaultMaterial;
-        meshRenderer.material.color = MaterialHandler.Instance.RailPlankColor;
-        plankObject.AddComponent<MeshCollider>();
+        MeshGenerator.AddCuboid(ref vertices, ref triangles, leftBackTop, rightBackTop, rightFrontTop, leftFrontTop, leftBackBot, rightBackBot, rightFrontBot, leftFrontBot);
+        MeshGenerator.ApplyMesh(plankObject, vertices, triangles, MaterialHandler.Instance.RailPlankColor);
     }
 }

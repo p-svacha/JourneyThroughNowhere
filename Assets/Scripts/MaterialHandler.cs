@@ -5,6 +5,7 @@ using UnityEngine;
 public class MaterialHandler : MonoBehaviour
 {
     public Material DefaultMaterial;
+    public Color DefaultColor;
 
     [Header("Rails")]
     public Color RailTrackColor;

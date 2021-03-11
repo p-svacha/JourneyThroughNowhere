@@ -14,7 +14,7 @@ public class WorldGenerator : MonoBehaviour
         TerrainGenerator.DrawTestTerrain();
 
         RailPathGenerator = new RailPathGenerator();
-        RailPathGenerator.GeneratePath(200);
+        RailPathGenerator.GeneratePath(2000);
         //RailPathGenerator.DebugPath();
         RailPathGenerator.DrawPath();
 
@@ -31,11 +31,21 @@ public class WorldGenerator : MonoBehaviour
     {
         GameObject trainObject = new GameObject("Train");
         Train train = trainObject.AddComponent<Train>();
-        train.SetPosition(RailPathGenerator.RailSegments[4], 1f);
 
-        Wagon wagon = train.AddWagon();
+        List<RailSegment> segments = new List<RailSegment>();
+        for(int i = 0; i < 80; i++) segments.Insert(0, RailPathGenerator.RailSegments[i]);
+        train.Init(segments);
 
-        TrainWheel wheel = TrainWheelGenerator.GenerateTrainWheel(new Vector3(4f, 4f, 4f));
-        wagon.AddWheel(wheel, WheelPosition.FrontLeft);
+        for (int i = 0; i < 4; i++)
+        {
+            Wagon wagon = train.AddWagon();
+
+            wagon.AddWheel(TrainWheelGenerator.GenerateTrainWheel(), WheelPosition.FrontLeft);
+            wagon.AddWheel(TrainWheelGenerator.GenerateTrainWheel(), WheelPosition.FrontRight);
+            wagon.AddWheel(TrainWheelGenerator.GenerateTrainWheel(), WheelPosition.RearLeft);
+            wagon.AddWheel(TrainWheelGenerator.GenerateTrainWheel(), WheelPosition.RearRight);
+
+            wagon.AddFloor(WagonFloorGenerator.GenerateWagonFloor());
+        }
     }
 }
