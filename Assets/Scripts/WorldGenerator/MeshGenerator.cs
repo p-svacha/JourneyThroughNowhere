@@ -5,10 +5,10 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-    public static GameObject CreateEmptyObject(string name, Transform parent = null)
+    public static GameObject CreateEmptyObject(string name, string layer, Transform parent = null)
     {
         GameObject newObject = new GameObject(name);
-        newObject.layer = LayerMask.NameToLayer("Ground");
+        newObject.layer = LayerMask.NameToLayer(layer);
         if(parent != null) newObject.transform.SetParent(parent);
         newObject.AddComponent<MeshFilter>();
         newObject.AddComponent<MeshRenderer>();

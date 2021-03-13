@@ -6,7 +6,7 @@ public static class WagonFloorGenerator
 {
     public static WagonFloor GenerateWagonFloor()
     {
-        GameObject floorObject = MeshGenerator.CreateEmptyObject("Floor");
+        GameObject floorObject = MeshGenerator.CreateEmptyObject("Floor", "Train");
 
         Vector3[] vertices = new Vector3[0];
         int[] triangles = new int[0];

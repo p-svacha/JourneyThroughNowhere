@@ -81,7 +81,7 @@ public static class RailSegmentMeshGenerator
 
     private static void GeneratePlank(GameObject segmentObject, RailPathPoint p1, RailPathPoint p2, RailSettings settings, Vector3 toVector, Vector3 toVectorPpc)
     {
-        GameObject plankObject = MeshGenerator.CreateEmptyObject("Plank", segmentObject.transform);
+        GameObject plankObject = MeshGenerator.CreateEmptyObject("Plank", "Ground", segmentObject.transform);
 
         Vector3[] vertices = new Vector3[0];
         int[] triangles = new int[0];

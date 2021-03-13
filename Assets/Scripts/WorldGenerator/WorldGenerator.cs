@@ -14,7 +14,7 @@ public class WorldGenerator : MonoBehaviour
         TerrainGenerator.DrawTestTerrain();
 
         RailPathGenerator = new RailPathGenerator();
-        RailPathGenerator.GeneratePath(2000);
+        RailPathGenerator.GeneratePath(1000);
         //RailPathGenerator.DebugPath();
         RailPathGenerator.DrawPath();
 
@@ -33,7 +33,7 @@ public class WorldGenerator : MonoBehaviour
         Train train = trainObject.AddComponent<Train>();
 
         List<RailSegment> segments = new List<RailSegment>();
-        for(int i = 0; i < 80; i++) segments.Insert(0, RailPathGenerator.RailSegments[i]);
+        for(int i = 0; i < 30; i++) segments.Insert(0, RailPathGenerator.RailSegments[i]);
         train.Init(segments);
 
         for (int i = 0; i < 4; i++)

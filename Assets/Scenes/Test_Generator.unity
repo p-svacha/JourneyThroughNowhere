@@ -258,8 +258,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1375364523}
-  - component: {fileID: 1375364522}
   - component: {fileID: 1375364521}
+  - component: {fileID: 1375364522}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -280,16 +280,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Player: {fileID: 1375364523}
-  Controller: {fileID: 1375364522}
   Camera: {fileID: 222911739}
   GroundCheck: {fileID: 1980810689}
+  Controller: {fileID: 1375364522}
   MouseSensitivity: 300
   MovementSpeed: 12
   JumpHeight: 2
-  GroundDistance: 0.4
+  GroundDistance: 0.2
   GroudMask:
     serializedVersion: 2
     m_Bits: 256
+  IsOnGround: 0
+  TrainMask:
+    serializedVersion: 2
+    m_Bits: 512
+  IsOnTrain: 0
+  CurrentWagon: {fileID: 0}
   IsGrounded: 0
   Velocity: {x: 0, y: 0, z: 0}
   RotationX: 0
@@ -304,7 +310,7 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 2
+  m_Height: 1.9
   m_Radius: 0.5
   m_SlopeLimit: 45
   m_StepOffset: 0
@@ -319,7 +325,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1375364520}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0}
+  m_LocalPosition: {x: 0, y: 1.86, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1756932168}
@@ -481,7 +487,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1980810688}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: -0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1375364523}

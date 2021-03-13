@@ -31,6 +31,9 @@ public class RailSegment : MonoBehaviour
         return Vector3.Lerp(FromPoint.Position, ToPoint.Position, distance / RailPathGenerator.RailSegmentLength);
     }
 
+    /// <summary>
+    /// Returns the segment in the direction when coming from "previousSegment"
+    /// </summary>
     public RailSegment GetNextSegment(RailSegment previousSegment)
     {
         // can only handle straights

@@ -6,17 +6,22 @@ using UnityEngine;
 public class Wagon : MonoBehaviour
 {
     public const float WheelHeight = 0.8f;
-    public const float Length = 8f;
-    public const float Width = 3f;
+    public const float Length = 12f;
+    public const float Width = 5f;
     public const float WheelInset = 1f;
 
     public Train Train;
+    public float TargetAngle;
+    private const float MaxAngleChangePerKph = 0.4f;
+
     public RailPathPosition RailPosition;
+    public Vector3 FrameMoveVector;
+    public float FrameMoveRotation;
 
     public Dictionary<WheelPosition, TrainWheel> Wheels;
     public WagonFloor Floor;
 
-    public void InitWagon(Train train, List<RailSegment> segments, float distance)
+    public void InitWagon(Train train, RailPathPosition position)
     {
         Train = train;
         Wheels = new Dictionary<WheelPosition, TrainWheel>()
@@ -26,7 +31,7 @@ public class Wagon : MonoBehaviour
             { WheelPosition.RearLeft, null },
             { WheelPosition.RearRight, null },
         };
-        RailPosition = new RailPathPosition(segments, distance);
+        RailPosition = position;
     }
 
     public void AddWheel(TrainWheel wheel, WheelPosition position)
@@ -34,72 +39,72 @@ public class Wagon : MonoBehaviour
         Wheels[position] = wheel;
         wheel.transform.SetParent(transform);
         wheel.Wagon = this;
-        UpdatePosition();
+        UpdatePosition(false);
     }
 
     public void AddFloor(WagonFloor floor)
     {
         Floor = floor;
         floor.transform.SetParent(transform);
+        floor.transform.localPosition = new Vector3(0f, RailPosition.Segment.Settings.TotalHeight + WheelHeight, 0f);
+        floor.transform.localRotation = Quaternion.identity;
         floor.Wagon = this;
-        UpdatePosition();
+        UpdatePosition(false);
     }
 
     public void SetPosition(RailPathPosition position)
     {
+        FrameMoveVector = position.GetWorldPosition() - RailPosition.GetWorldPosition();
         RailPosition.SetPosition(position);
-        UpdatePosition();
+        UpdatePosition(true);
     }
 
-    private void UpdatePosition()
+    private void UpdatePosition(bool smooth)
     {
-        float ratio = RailPosition.CurrentSegmentDistance / RailPathGenerator.RailSegmentLength;
-        Vector3 realPosition = Vector3.Lerp(RailPosition.CurrentSegment.FromPoint.Position, RailPosition.CurrentSegment.ToPoint.Position, ratio);
-        transform.position = realPosition;
+        transform.position = RailPosition.GetWorldPosition();
+        Quaternion preRotation = transform.rotation;
+        transform.rotation = GetRotation(smooth);
+        FrameMoveRotation = transform.rotation.eulerAngles.y - preRotation.eulerAngles.y;
 
         foreach (KeyValuePair<WheelPosition, TrainWheel> kvp in Wheels.Where(x => x.Value != null))
         {
             kvp.Value.transform.position = GetWheelPosition(kvp.Key);
             kvp.Value.transform.rotation = GetWheelRotation(kvp.Key);
         }
-
-        if (Floor != null)
-        {
-            Floor.transform.position = GetFloorPosition();
-            Floor.transform.rotation = GetFloorRotation();
-        }
     }
 
-    private Vector3 GetFloorPosition()
+    private Quaternion GetRotation(bool smooth)
     {
-        Vector3 heightOffset = new Vector3(0f, RailPosition.CurrentSegment.Settings.TotalHeight + WheelHeight, 0f);
-        return RailPosition.GetWorldPosition() + heightOffset;
-    }
-
-    private Quaternion GetFloorRotation()
-    {
-        float frontAngle = RailPosition.CurrentSegment.Angle;
-        RailPathPosition backPosition = RailPosition.GetBackwardsPathPosition(Length);
-        float backAngle = backPosition.CurrentSegment.Angle;
+        float frontAngle = RailPosition.Segment.Angle;
+        RailPathPosition backPosition = Train.GetBackwardsPathPosition(RailPosition, Length);
+        float backAngle = backPosition.Segment.Angle;
         float avgAngle = (frontAngle + backAngle) / 2f;
-        return Quaternion.Euler(0, avgAngle + 180, 0);
+        TargetAngle = avgAngle + 180;
+        if (!smooth) return Quaternion.Euler(0f, TargetAngle, 0f);
+        float currentAngle = transform.rotation.eulerAngles.y;
+        float maxAngleChange = MaxAngleChangePerKph * Mathf.Abs(Train.VelocityKph) * Time.deltaTime;
+        if (Mathf.Abs(TargetAngle - currentAngle) <= maxAngleChange) return Quaternion.Euler(0f, TargetAngle, 0f);
+        else if (TargetAngle > currentAngle) return Quaternion.Euler(0f, currentAngle + maxAngleChange, 0f);
+        else if (TargetAngle < currentAngle) return Quaternion.Euler(0f, currentAngle - maxAngleChange, 0f);
+        Debug.Log("Target: " + TargetAngle + " / Current: " + currentAngle);
+        throw new System.Exception();
     }
 
     private Vector3 GetWheelPosition(WheelPosition position)
     {
         RailPathPosition wheelPosition = null;
-        if (position == WheelPosition.FrontLeft || position == WheelPosition.FrontRight) wheelPosition = RailPosition.GetBackwardsPathPosition(WheelInset);
-        if (position == WheelPosition.RearLeft || position == WheelPosition.RearRight) wheelPosition = RailPosition.GetBackwardsPathPosition(Length - WheelInset);
+        if (position == WheelPosition.FrontLeft || position == WheelPosition.FrontRight) wheelPosition = Train.GetBackwardsPathPosition(RailPosition, WheelInset);
+        if (position == WheelPosition.RearLeft || position == WheelPosition.RearRight) wheelPosition = Train.GetBackwardsPathPosition(RailPosition, Length - WheelInset);
 
-        Vector3 wheelCenterPosition = wheelPosition.CurrentSegment.GetWorldPositionAtDistance(wheelPosition.CurrentSegmentDistance);
+        Vector3 wheelCenterPosition = wheelPosition.Segment.GetWorldPositionAtDistance(wheelPosition.Distance);
 
-        RailSettings railSettings = wheelPosition.CurrentSegment.Settings;
+        RailSettings railSettings = wheelPosition.Segment.Settings;
         float height = railSettings.TrackHeight + railSettings.PlankHeight + WheelHeight / 2;
 
         float wheelDistance = railSettings.TrackGap / 2;
         float wheelAngle = 0f;
-        if (position == WheelPosition.FrontLeft || position == WheelPosition.RearLeft) wheelAngle = wheelPosition.CurrentSegment.Angle + 90;
-        if (position == WheelPosition.FrontRight || position == WheelPosition.RearRight) wheelAngle = wheelPosition.CurrentSegment.Angle - 90;
+        if (position == WheelPosition.FrontLeft || position == WheelPosition.RearLeft) wheelAngle = wheelPosition.Segment.Angle + 90;
+        if (position == WheelPosition.FrontRight || position == WheelPosition.RearRight) wheelAngle = wheelPosition.Segment.Angle - 90;
 
         float offsetX = Mathf.Sin(Mathf.Deg2Rad * wheelAngle) * wheelDistance;
         float offsetZ = Mathf.Cos(Mathf.Deg2Rad * wheelAngle) * wheelDistance;
@@ -111,10 +116,10 @@ public class Wagon : MonoBehaviour
     private Quaternion GetWheelRotation(WheelPosition position)
     {
         RailPathPosition wheelPosition = null;
-        if (position == WheelPosition.FrontLeft || position == WheelPosition.FrontRight) wheelPosition = RailPosition.GetBackwardsPathPosition(WheelInset);
-        if (position == WheelPosition.RearLeft || position == WheelPosition.RearRight) wheelPosition = RailPosition.GetBackwardsPathPosition(Length - WheelInset);
+        if (position == WheelPosition.FrontLeft || position == WheelPosition.FrontRight) wheelPosition = Train.GetBackwardsPathPosition(RailPosition, WheelInset);
+        if (position == WheelPosition.RearLeft || position == WheelPosition.RearRight) wheelPosition = Train.GetBackwardsPathPosition(RailPosition, Length - WheelInset);
 
-        return Quaternion.Euler(90f, 90f + wheelPosition.CurrentSegment.Angle, 0f);
+        return Quaternion.Euler(90f, 90f + wheelPosition.Segment.Angle, 0f);
     }
 }
 
