@@ -5,9 +5,14 @@ using UnityEngine;
 public class RailPathGenerator
 {
     public const float RailSegmentLength = 2f;
-    private const float MaxAngleChange = 3f;
+    private const float MaxCurveChange = 0.1f;
+    private const float MaxSlopeChange = 0.1f;
 
     private float CurrentAngle;
+    private float CurrentCurve;
+
+    private float CurrentElevation;
+    private float CurrentSlope;
     
     private List<RailPathPoint> PathPoints = new List<RailPathPoint>();
     public List<RailSegment> RailSegments = new List<RailSegment>();
@@ -72,7 +77,7 @@ public class RailPathGenerator
     private void GeneratePathSegment()
     {
         float nextX = CurrentPoint.Position.x + (Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * RailSegmentLength);
-        float nextY = 0f;
+        float nextY = CurrentElevation;
         float nextZ = CurrentPoint.Position.z + (Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * RailSegmentLength);
         Vector3 newPosition = new Vector3(nextX, nextY, nextZ);
         RailPathPoint nextPoint = new RailPathPoint(newPosition, CurrentPoint);
@@ -80,8 +85,13 @@ public class RailPathGenerator
         PathPoints.Add(nextPoint);
         CurrentPoint = nextPoint;
 
-        float angleChange = Random.Range(0f, MaxAngleChange * 2f) - MaxAngleChange;
-        CurrentAngle += angleChange;
+        float angleChange = Random.Range(0f, MaxCurveChange * 2f) - MaxCurveChange;
+        CurrentCurve += angleChange;
+        CurrentAngle += CurrentCurve;
+
+        float elevationChange = Random.Range(0f, MaxSlopeChange * 2f) - MaxSlopeChange;
+        CurrentSlope += elevationChange;
+        CurrentElevation += CurrentSlope;
     }
 
     private void AddConnection(RailPathPoint p1, RailPathPoint p2)

@@ -11,8 +11,13 @@ public class Wagon : MonoBehaviour
     public const float WheelInset = 1f;
 
     public Train Train;
-    public float TargetAngle;
+
+    public float TargetAngle; // y-rotation
     private const float MaxAngleChangePerKph = 0.4f;
+
+    public float TargetSlope; // x-rotation
+    public float CurrentSlope;
+    private const float MaxSlopeChangePerKph = 0.4f;
 
     public RailPathPosition RailPosition;
     public Vector3 FrameMoveVector;
@@ -63,7 +68,7 @@ public class Wagon : MonoBehaviour
     {
         transform.position = RailPosition.GetWorldPosition();
         Quaternion preRotation = transform.rotation;
-        transform.rotation = GetRotation(smooth);
+        transform.rotation = Quaternion.Euler(GetSlope(smooth), GetRotation(smooth), 0f);
         FrameMoveRotation = transform.rotation.eulerAngles.y - preRotation.eulerAngles.y;
 
         foreach (KeyValuePair<WheelPosition, TrainWheel> kvp in Wheels.Where(x => x.Value != null))
@@ -73,20 +78,36 @@ public class Wagon : MonoBehaviour
         }
     }
 
-    private Quaternion GetRotation(bool smooth)
+    private float GetRotation(bool smooth)
     {
         float frontAngle = RailPosition.Segment.Angle;
         RailPathPosition backPosition = Train.GetBackwardsPathPosition(RailPosition, Length);
         float backAngle = backPosition.Segment.Angle;
         float avgAngle = (frontAngle + backAngle) / 2f;
         TargetAngle = avgAngle + 180;
-        if (!smooth) return Quaternion.Euler(0f, TargetAngle, 0f);
+
+        if (!smooth) return TargetAngle;
         float currentAngle = transform.rotation.eulerAngles.y;
         float maxAngleChange = MaxAngleChangePerKph * Mathf.Abs(Train.VelocityKph) * Time.deltaTime;
-        if (Mathf.Abs(TargetAngle - currentAngle) <= maxAngleChange) return Quaternion.Euler(0f, TargetAngle, 0f);
-        else if (TargetAngle > currentAngle) return Quaternion.Euler(0f, currentAngle + maxAngleChange, 0f);
-        else if (TargetAngle < currentAngle) return Quaternion.Euler(0f, currentAngle - maxAngleChange, 0f);
-        Debug.Log("Target: " + TargetAngle + " / Current: " + currentAngle);
+        if (Mathf.Abs(TargetAngle - currentAngle) <= maxAngleChange) return TargetAngle;
+        else if (TargetAngle > currentAngle) return currentAngle + maxAngleChange;
+        else if (TargetAngle < currentAngle) return currentAngle - maxAngleChange;
+        throw new System.Exception();
+    }
+
+    private float GetSlope(bool smooth)
+    {
+        Vector3 frontPosition = RailPosition.GetWorldPosition();
+        Vector3 backPosition = Train.GetBackwardsPathPosition(RailPosition, Length).GetWorldPosition();
+        TargetSlope = 90f - Vector3.Angle(backPosition - frontPosition, Vector3.down);
+
+        if (!smooth) return TargetSlope;
+        CurrentSlope = transform.rotation.eulerAngles.x;
+        CurrentSlope = (CurrentSlope > 180) ? CurrentSlope - 360 : CurrentSlope;
+        float maxSlopeChange = MaxSlopeChangePerKph * Mathf.Abs(Train.VelocityKph) * Time.deltaTime;
+        if (Mathf.Abs(TargetSlope - CurrentSlope) <= maxSlopeChange) return TargetSlope;
+        else if (TargetSlope > CurrentSlope) return CurrentSlope + maxSlopeChange;
+        else if (TargetSlope < CurrentSlope) return CurrentSlope - maxSlopeChange;
         throw new System.Exception();
     }
 

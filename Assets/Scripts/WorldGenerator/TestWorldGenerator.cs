@@ -2,29 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WorldGenerator : MonoBehaviour
+public class TestWorldGenerator : MonoBehaviour
 {
     private RailPathGenerator RailPathGenerator;
-    private TerrainGenerator TerrainGenerator;
+    //private TerrainGenerator TerrainGenerator;
 
     // Start is called before the first frame update
     void Start()
     {
-        TerrainGenerator = new TerrainGenerator();
-        TerrainGenerator.DrawTestTerrain();
+        //TerrainGenerator = new TerrainGenerator();
+        //TerrainGenerator.DrawTestTerrain();
 
         RailPathGenerator = new RailPathGenerator();
         RailPathGenerator.GeneratePath(1000);
-        //RailPathGenerator.DebugPath();
+        RailPathGenerator.DebugPath();
         RailPathGenerator.DrawPath();
 
         TestSpawnTrain();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void TestSpawnTrain()

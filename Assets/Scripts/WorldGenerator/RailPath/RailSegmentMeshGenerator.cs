@@ -11,10 +11,10 @@ public static class RailSegmentMeshGenerator
         RailSegment railSegment = railSegmentObject.AddComponent<RailSegment>();
 
         Vector3 toVector = p2.Position - p1.Position;
-        Vector3 toVectorPpc = (Quaternion.Euler(0, 90, 0) * toVector).normalized; // PPC = perpendicular (90°)
+        Vector3 toVectorPpc = (Quaternion.Euler(0, 90, 0) * new Vector3(toVector.x, 0f, toVector.z)).normalized; // PPC = perpendicular (90°)
 
         Vector3 fromVector = p1.PreviousPoint != null ? p1.Position - p1.PreviousPoint.Position : toVector;
-        Vector3 fromVectorPpc = (Quaternion.Euler(0, 90, 0) * fromVector).normalized;
+        Vector3 fromVectorPpc = (Quaternion.Euler(0, 90, 0) * new Vector3(fromVector.x, 0f, fromVector.z)).normalized;
 
         float offsetLeft = - (settings.TrackGap / 2 + settings.TrackWidth);
         float offsetRight = settings.TrackGap / 2;
