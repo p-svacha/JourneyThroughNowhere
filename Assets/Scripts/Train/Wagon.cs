@@ -17,7 +17,7 @@ public class Wagon : MonoBehaviour
 
     public float TargetSlope; // x-rotation
     public float CurrentSlope;
-    private const float MaxSlopeChangePerKph = 0.4f;
+    private const float MaxSlopeChangePerKph = 0.6f;
 
     public RailPathPosition RailPosition;
     public Vector3 FrameMoveVector;

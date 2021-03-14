@@ -20,6 +20,7 @@ public class RailSegment : MonoBehaviour
         SegmentVector = ToPoint.Position - FromPoint.Position;
 
         Angle = Vector2.SignedAngle(new Vector2(SegmentVector.x, SegmentVector.z), Vector2.up);
+        Angle = (Angle > 180) ? Angle + 360 : Angle;
 
         FromPoint.Segments.Add(this);
         ToPoint.Segments.Add(this);

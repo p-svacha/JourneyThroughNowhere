@@ -8,6 +8,8 @@ public class RailPathGenerator
     private const float MaxCurveChange = 0.1f;
     private const float MaxSlopeChange = 0.1f;
 
+    private TerrainGenerator Terrain;
+
     private float CurrentAngle;
     private float CurrentCurve;
 
@@ -20,11 +22,12 @@ public class RailPathGenerator
 
     private RailSettings RailSettings;
 
-    public RailPathGenerator()
+    public RailPathGenerator(TerrainGenerator terrain)
     {
+        Terrain = terrain;
         CurrentAngle = 0f;
 
-        CurrentPoint = new RailPathPoint(new Vector3(0f, 0f, 0f), null);
+        CurrentPoint = new RailPathPoint(new Vector3(0f, Terrain.GetElevation(new Vector2(0f, 0f)), 0f), null);
         PathPoints.Add(CurrentPoint);
         RailSettings = new RailSettings(plankWidth: 3f, plankHeight: 0.2f, trackWidth: 0.1f, trackGap: 1.5f, trackHeight: 0.2f);
     }
@@ -77,9 +80,11 @@ public class RailPathGenerator
     private void GeneratePathSegment()
     {
         float nextX = CurrentPoint.Position.x + (Mathf.Sin(Mathf.Deg2Rad * CurrentAngle) * RailSegmentLength);
-        float nextY = CurrentElevation;
         float nextZ = CurrentPoint.Position.z + (Mathf.Cos(Mathf.Deg2Rad * CurrentAngle) * RailSegmentLength);
-        Vector3 newPosition = new Vector3(nextX, nextY, nextZ);
+
+        float elevation = Terrain.GetElevation(new Vector2(nextX, nextZ));
+
+        Vector3 newPosition = new Vector3(nextX, elevation, nextZ);
         RailPathPoint nextPoint = new RailPathPoint(newPosition, CurrentPoint);
         AddConnection(CurrentPoint, nextPoint);
         PathPoints.Add(nextPoint);

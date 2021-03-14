@@ -4,21 +4,24 @@ using UnityEngine;
 
 public class TestWorldGenerator : MonoBehaviour
 {
+    public CharacterController Player;
+
     private RailPathGenerator RailPathGenerator;
-    //private TerrainGenerator TerrainGenerator;
+    private TerrainGenerator TerrainGenerator;
 
     // Start is called before the first frame update
     void Start()
     {
-        //TerrainGenerator = new TerrainGenerator();
-        //TerrainGenerator.DrawTestTerrain();
+        TerrainGenerator = new TerrainGenerator();
 
-        RailPathGenerator = new RailPathGenerator();
-        RailPathGenerator.GeneratePath(1000);
+        RailPathGenerator = new RailPathGenerator(TerrainGenerator);
+        RailPathGenerator.GeneratePath(300);
         RailPathGenerator.DebugPath();
         RailPathGenerator.DrawPath();
 
         TestSpawnTrain();
+
+        Player.transform.position = new Vector3(0f, TerrainGenerator.GetElevation(new Vector2(0f, 0f)) + 2f, 0f);
     }
 
     private void TestSpawnTrain()
